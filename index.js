@@ -26,18 +26,28 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const userCollection = client.db('BloodBankerDB').collection('users');
+        const districtCollection = client.db('BloodBankerDB').collection('district');
+        const upazilaCollection = client.db('BloodBankerDB').collection('upazila');
+
+        // district api
+        app.get('/district', async (req, res) => {
+            const result = await districtCollection.find().toArray()
+            res.send(result)
+        })
+
+        // upazila api
+        app.get('/upazila', async (req, res) => {
+            const result = await upazilaCollection.find().toArray()
+            res.send(result)
+        })
+
+
         // jwt api
         // app.get('/user',async (req, res) =>{
         //     const result = await userCollection.find().toArray();
         //     res.send(result)
         // })
-        
-        app.get('/user/:email', async (req, res) => {
-            const email = req.params.email;
-            const query = { email: email };
-            const result=await userCollection.findOne(query);
-            res.send(result);
-        })
+
 
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -48,6 +58,13 @@ async function run() {
         })
 
         // user api
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await userCollection.findOne(query);
+            res.send(result);
+        })
+
         app.post('/user', async (req, res) => {
             const user = req.body;
             const query = { email: user.email };
