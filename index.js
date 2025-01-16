@@ -25,7 +25,19 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+        const userCollection = client.db('BloodBankerDB').collection('users');
         // jwt api
+        // app.get('/user',async (req, res) =>{
+        //     const result = await userCollection.find().toArray();
+        //     res.send(result)
+        // })
+        
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result=await userCollection.findOne(query);
+            res.send(result);
+        })
 
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -33,6 +45,18 @@ async function run() {
                 expiresIn: '10h'
             });
             res.send({ token });
+        })
+
+        // user api
+        app.post('/user', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email };
+            const isExist = await userCollection.findOne(query);
+            if (isExist) {
+                return res.send({ message: 'user already exist' })
+            };
+            const result = await userCollection.insertOne(user);
+            res.send(result);
         })
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
