@@ -4,7 +4,7 @@ const cors = require('cors')
 const app = express()
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.use(cors())
 app.use(express.json())
@@ -62,13 +62,13 @@ async function run() {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
-        
-        app.get('/user/:email', async (req, res) => {
+
+        app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
             res.send(result);
-        })
+        });
 
         app.post('/user', async (req, res) => {
             const user = req.body;
@@ -78,6 +78,23 @@ async function run() {
                 return res.send({ message: 'user already exist' })
             };
             const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+
+        app.put('/user/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+
+            const updateDoc = {
+                $set: {
+                    name: user.name,
+                    upazila: user.upazila,
+                    district: user.district,
+                    bloodGroup: user.bloodGroup
+                },
+            };
+
+            const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
         // Send a ping to confirm a successful connection
