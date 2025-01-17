@@ -6,7 +6,9 @@ const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173']
+}))
 app.use(express.json())
 
 
@@ -43,32 +45,70 @@ async function run() {
 
 
         // jwt api
-        // app.get('/user',async (req, res) =>{
-        //     const result = await userCollection.find().toArray();
-        //     res.send(result)
-        // })
-
-
         app.post('/jwt', async (req, res) => {
             const user = req.body;
+            console.log('user--->', user)
             const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
                 expiresIn: '10h'
             });
             res.send({ token });
         })
 
+        const verifyToken = (req, res, next) => {
+            console.log('inside---->', req.headers.authorization)
+            if (!req.headers.authorization) {
+                return res.status(401).send({ message: 'forbidden access' })
+            }
+
+            const token = req.headers.authorization.split(' ')[1];
+            console.log('Extracted Token:', token);
+            jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'forbidden access' })
+                }
+                req.decoded = decoded;
+                next()
+            })
+        }
+
+        const verifyAdmin = async (req, res, next) => {
+            const email = req?.decoded?.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isAdmin = user?.role === 'Admin';
+            if (!isAdmin) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next()
+        }
+
         // user api
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyToken, async (req, res) => {
+            console.log("de->>>", req.decoded)
             const result = await userCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/users/:email', async (req, res) => {
+        app.get('/users/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await userCollection.findOne(query);
             res.send(result);
         });
+
+        app.get('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            if (email !== req?.decoded?.email) {
+                return res.status(403).send({ message: 'Unauthorized access' });
+            }
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let admin = false;
+            if (user) {
+                admin = user?.role === 'Admin'
+            }
+            res.send({ admin })
+        })
 
         app.post('/user', async (req, res) => {
             const user = req.body;
