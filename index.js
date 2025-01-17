@@ -30,6 +30,7 @@ async function run() {
         const userCollection = client.db('BloodBankerDB').collection('users');
         const districtCollection = client.db('BloodBankerDB').collection('district');
         const upazilaCollection = client.db('BloodBankerDB').collection('upazila');
+        const donationCollection = client.db('BloodBankerDB').collection('donation');
 
         // district api
         app.get('/district', async (req, res) => {
@@ -135,6 +136,13 @@ async function run() {
             };
 
             const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        // donation api
+        app.post('/donation', verifyToken, async (req, res) => {
+            const donation = req.body;
+            const result = await donationCollection.insertOne(donation);
             res.send(result);
         })
         // Send a ping to confirm a successful connection
