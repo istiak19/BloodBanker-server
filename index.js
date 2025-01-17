@@ -62,7 +62,6 @@ async function run() {
             }
 
             const token = req.headers.authorization.split(' ')[1];
-            console.log('Extracted Token:', token);
             jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
                 if (err) {
                     return res.status(401).send({ message: 'forbidden access' })
@@ -85,7 +84,6 @@ async function run() {
 
         // user api
         app.get('/users', verifyToken, async (req, res) => {
-            console.log("de->>>", req.decoded)
             const result = await userCollection.find().toArray()
             res.send(result)
         })
@@ -95,6 +93,17 @@ async function run() {
             const query = { email: email };
             const result = await userCollection.findOne(query);
             res.send(result);
+        });
+
+        app.get("/users/status/:email", verifyToken, async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let isActive = false;
+            if (user) {
+                isActive = user?.status === "active"
+            }
+            res.send({ isActive })
         });
 
         app.get('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
