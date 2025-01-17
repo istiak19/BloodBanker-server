@@ -149,9 +149,52 @@ async function run() {
         })
 
         // donation api
+        app.get('/donations/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await donationCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        app.get('/donation/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await donationCollection.findOne(query);
+            res.send(result);
+        })
+
         app.post('/donation', verifyToken, async (req, res) => {
             const donation = req.body;
             const result = await donationCollection.insertOne(donation);
+            res.send(result);
+        })
+
+        app.put('/donation/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const donation = req.body;
+            console.log("Request body:", req.body); 
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    recipientName: donation.recipientName,
+                    upazila: donation.upazila,
+                    district: donation.district,
+                    message: donation.message,
+                    time: donation.time,
+                    address: donation.address,
+                    hospital: donation.hospital,
+                    bloodGroup: donation.bloodGroup,
+                    date: donation.date
+                },
+            };
+            const result = await donationCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        app.delete('/donation/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await donationCollection.deleteOne(query);
             res.send(result);
         })
         // Send a ping to confirm a successful connection
