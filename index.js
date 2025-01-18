@@ -90,6 +90,16 @@ async function run() {
             }
             next()
         }
+        const verifyDonor = async (req, res, next) => {
+            const email = req?.decoded?.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isDonor = user?.role === 'donor';
+            if (!isDonor) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next()
+        }
 
         // user api
         app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
@@ -146,6 +156,19 @@ async function run() {
                 volunteer = user?.role === 'volunteer'
             }
             res.send({ volunteer })
+        })
+        app.get('/users/donor/:email', verifyToken, verifyDonor, async (req, res) => {
+            const email = req.params.email;
+            if (email !== req?.decoded?.email) {
+                return res.status(403).send({ message: 'Unauthorized access' });
+            }
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let donor = false;
+            if (user) {
+                donor = user?.role === 'donor'
+            }
+            res.send({ donor })
         })
 
         app.post('/user', async (req, res) => {
