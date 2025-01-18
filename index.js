@@ -55,7 +55,7 @@ async function run() {
         })
 
         const verifyToken = (req, res, next) => {
-            console.log('inside---->', req.headers.authorization)
+            // console.log('inside---->', req.headers.authorization)
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'forbidden access' })
             }
@@ -292,7 +292,7 @@ async function run() {
         })
 
         // admin-stats
-        app.get('/admin-states', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/states', verifyToken, async (req, res) => {
             const users = await userCollection.estimatedDocumentCount();
             const donations = await donationCollection.estimatedDocumentCount();
             res.send({ users, donations })
