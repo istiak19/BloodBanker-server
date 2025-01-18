@@ -55,7 +55,7 @@ async function run() {
         })
 
         const verifyToken = (req, res, next) => {
-            console.log('inside---->', req.headers.authorization)
+            // console.log('inside---->', req.headers.authorization)
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'forbidden access' })
             }
@@ -155,13 +155,24 @@ async function run() {
         app.patch('/user/:id', async (req, res) => {
             const id = req.params.id;
             const user = req.body;
-            const filter = { _id: new ObjectId(id) };
             const updateDoc = {
                 $set: {
-                    status: user.status,
+                    status: user.status
+                },
+            };
+            const filter = { _id: new ObjectId(id) };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+        app.patch('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const user = req.body;
+            const updateDoc = {
+                $set: {
                     role: user.role
                 },
             };
+            const filter = { _id: new ObjectId(id) };
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
