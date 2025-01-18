@@ -82,10 +82,15 @@ async function run() {
         }
 
         // user api
+        app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(result)
+        });
+
         app.get('/users', verifyToken, async (req, res) => {
             const result = await userCollection.find().toArray()
             res.send(result)
-        })
+        });
 
         app.get('/users/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
@@ -132,8 +137,8 @@ async function run() {
 
         app.put('/user/:id', async (req, res) => {
             const id = req.params.id;
+            const user = req.body;
             const filter = { _id: new ObjectId(id) };
-
             const updateDoc = {
                 $set: {
                     name: user.name,
@@ -143,6 +148,20 @@ async function run() {
                 },
             };
 
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        app.patch('/user/:id', async (req, res) => {
+            const id = req.params.id;
+            const user = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: user.status,
+                    role: user.role
+                },
+            };
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
@@ -213,6 +232,14 @@ async function run() {
             const result = await donationCollection.deleteOne(query);
             res.send(result);
         })
+
+        // admin-stats
+        app.get('/admin-states', verifyToken, verifyAdmin, async (req, res) => {
+            const users = await userCollection.estimatedDocumentCount();
+            const donations = await donationCollection.estimatedDocumentCount();
+            res.send({ users, donations })
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
