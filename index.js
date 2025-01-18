@@ -55,7 +55,7 @@ async function run() {
         })
 
         const verifyToken = (req, res, next) => {
-            // console.log('inside---->', req.headers.authorization)
+            console.log('inside---->', req.headers.authorization)
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'forbidden access' })
             }
@@ -80,6 +80,16 @@ async function run() {
             }
             next()
         }
+        // const verifyVolunteer = async (req, res, next) => {
+        //     const email = req?.decoded?.email;
+        //     const query = { email: email };
+        //     const user = await userCollection.findOne(query);
+        //     const isVolunteer = user?.role === 'volunteer';
+        //     if (!isVolunteer) {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
+        //     next()
+        // }
 
         // user api
         app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
@@ -123,6 +133,20 @@ async function run() {
             }
             res.send({ admin })
         })
+
+        // app.get('/users/volunteer/:email', verifyToken, verifyVolunteer, async (req, res) => {
+        //     const email = req.params.email;
+        //     if (email !== req?.decoded?.email) {
+        //         return res.status(403).send({ message: 'Unauthorized access' });
+        //     }
+        //     const query = { email: email };
+        //     const user = await userCollection.findOne(query);
+        //     let volunteer = false;
+        //     if (user) {
+        //         volunteer = user?.role === 'volunteer'
+        //     }
+        //     res.send({ volunteer })
+        // })
 
         app.post('/user', async (req, res) => {
             const user = req.body;
