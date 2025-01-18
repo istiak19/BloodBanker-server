@@ -31,6 +31,7 @@ async function run() {
         const districtCollection = client.db('BloodBankerDB').collection('district');
         const upazilaCollection = client.db('BloodBankerDB').collection('upazila');
         const donationCollection = client.db('BloodBankerDB').collection('donation');
+        const blogCollection = client.db('BloodBankerDB').collection('blog');
 
         // district api
         app.get('/district', async (req, res) => {
@@ -288,6 +289,13 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await donationCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // blog api
+        app.post('/blog', verifyToken, verifyAdmin, async (req, res) => {
+            const blog = req.body;
+            const result = await blogCollection.insertOne(blog);
             res.send(result);
         })
 
