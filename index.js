@@ -268,6 +268,12 @@ async function run() {
             const result = await blogCollection.find().toArray();
             res.send(result);
         })
+        app.get('/blog/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await blogCollection.findOne(query);
+            res.send(result);
+        })
 
         app.post('/blog', verifyToken, async (req, res) => {
             const blog = req.body;
