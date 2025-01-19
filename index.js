@@ -303,7 +303,7 @@ async function run() {
             res.send(result);
         })
 
-        app.post('/blog', verifyToken, verifyAdmin, async (req, res) => {
+        app.post('/blog', verifyToken, async (req, res) => {
             const blog = req.body;
             const result = await blogCollection.insertOne(blog);
             res.send(result);
