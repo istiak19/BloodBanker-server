@@ -298,7 +298,7 @@ async function run() {
         })
 
         // blog api
-        app.get('/blog', verifyToken, async (req, res) => {
+        app.get('/blog', async (req, res) => {
             const result = await blogCollection.find().toArray();
             res.send(result);
         })
