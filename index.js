@@ -38,6 +38,7 @@ async function run() {
         const upazilaCollection = client.db('BloodBankerDB').collection('upazila');
         const donationCollection = client.db('BloodBankerDB').collection('donation');
         const blogCollection = client.db('BloodBankerDB').collection('blog');
+        const paymentCollection = client.db('BloodBankerDB').collection('payment');
 
         // district api
         app.get('/district', async (req, res) => {
@@ -302,12 +303,30 @@ async function run() {
             res.send(result);
         })
 
-        // admin-stats
+        // stats
         app.get('/states', verifyToken, async (req, res) => {
             const users = await userCollection.estimatedDocumentCount();
             const donations = await donationCollection.estimatedDocumentCount();
-            res.send({ users, donations })
-        })
+        
+            const payments = await paymentCollection.aggregate([
+                {
+                    $addFields: {
+                        amountNumber: { $toDouble: '$amount' }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalAmount: {
+                            $sum: '$amountNumber'
+                        }
+                    }
+                }
+            ]).toArray();
+        
+            const funds = payments.length > 0 ? payments[0].totalAmount : 0;
+            res.send({ users, donations, funds });
+        });        
 
         // payment intent
         app.post('/create-payment', async (req, res) => {
@@ -319,6 +338,17 @@ async function run() {
                 payment_method_types: ['card']
             })
             res.send({ clientSecret: paymentIntent.client_secret })
+        })
+
+        // payment api
+        app.get('/payments', verifyToken, async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+            res.send(result);
+        })
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+            res.send(result);
         })
 
         // Send a ping to confirm a successful connection
