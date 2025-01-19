@@ -298,9 +298,34 @@ async function run() {
         })
 
         // blog api
+        app.get('/blog', verifyToken, async (req, res) => {
+            const result = await blogCollection.find().toArray();
+            res.send(result);
+        })
+
         app.post('/blog', verifyToken, verifyAdmin, async (req, res) => {
             const blog = req.body;
             const result = await blogCollection.insertOne(blog);
+            res.send(result);
+        })
+
+        app.patch('/blog/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const blog = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    status: blog.status
+                },
+            };
+            const result = await blogCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        app.delete('/blog/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await blogCollection.deleteOne(query);
             res.send(result);
         })
 
