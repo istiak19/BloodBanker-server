@@ -136,45 +136,11 @@ async function run() {
             res.send({ isActive })
         });
 
-        app.get('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
-            const email = req.params.email;
-            if (email !== req?.decoded?.email) {
-                return res.status(403).send({ message: 'Unauthorized access' });
-            }
-            const query = { email: email };
-            const user = await userCollection.findOne(query);
-            let admin = false;
-            if (user) {
-                admin = user?.role === 'Admin'
-            }
-            res.send({ admin })
-        })
-
-        app.get('/users/volunteer/:email', verifyToken, verifyVolunteer, async (req, res) => {
-            const email = req.params.email;
-            if (email !== req?.decoded?.email) {
-                return res.status(403).send({ message: 'Unauthorized access' });
-            }
-            const query = { email: email };
-            const user = await userCollection.findOne(query);
-            let volunteer = false;
-            if (user) {
-                volunteer = user?.role === 'volunteer'
-            }
-            res.send({ volunteer })
-        })
-        app.get('/users/donor/:email', verifyToken, verifyDonor, async (req, res) => {
-            const email = req.params.email;
-            if (email !== req?.decoded?.email) {
-                return res.status(403).send({ message: 'Unauthorized access' });
-            }
-            const query = { email: email };
-            const user = await userCollection.findOne(query);
-            let donor = false;
-            if (user) {
-                donor = user?.role === 'donor'
-            }
-            res.send({ donor })
+        // role api
+        app.get('/users/role/:email', async (req, res) => {
+            const email = req.params.email
+            const result = await userCollection.findOne({ email })
+            res.send({ role: result?.role })
         })
 
         app.post('/user', async (req, res) => {
