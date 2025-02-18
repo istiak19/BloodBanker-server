@@ -88,26 +88,6 @@ async function run() {
             }
             next()
         }
-        const verifyVolunteer = async (req, res, next) => {
-            const email = req?.decoded?.email;
-            const query = { email: email };
-            const user = await userCollection.findOne(query);
-            const isVolunteer = user?.role === 'volunteer';
-            if (!isVolunteer) {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-            next()
-        }
-        const verifyDonor = async (req, res, next) => {
-            const email = req?.decoded?.email;
-            const query = { email: email };
-            const user = await userCollection.findOne(query);
-            const isDonor = user?.role === 'donor';
-            if (!isDonor) {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-            next()
-        }
 
         // user api
         app.get('/user', verifyToken, verifyAdmin, async (req, res) => {
