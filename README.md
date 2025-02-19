@@ -1,7 +1,3 @@
-Here's a well-structured `README.md` file for your **BloodBanker Backend** project:  
-
----
-
 # 🩸 BloodBanker - Backend  
 
 **BloodBanker** is an online platform designed to connect blood donors and recipients, enabling seamless and efficient blood donation management. This repository contains the backend of the application, handling authentication, database management, and core functionalities required for the system.  
