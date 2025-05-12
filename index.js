@@ -132,7 +132,12 @@ async function run() {
             if (isExist) {
                 return res.send({ message: 'user already exist' })
             };
-            const result = await userCollection.insertOne(user);
+            const userInfo = {
+                ...user,
+                role: 'donor',
+                status: 'active'
+            }
+            const result = await userCollection.insertOne(userInfo);
             res.send(result);
         })
 
@@ -287,7 +292,7 @@ async function run() {
         app.get('/states', verifyToken, async (req, res) => {
             const users = await userCollection.estimatedDocumentCount();
             const donations = await donationCollection.estimatedDocumentCount();
-        
+
             const payments = await paymentCollection.aggregate([
                 {
                     $addFields: {
@@ -303,10 +308,10 @@ async function run() {
                     }
                 }
             ]).toArray();
-        
+
             const funds = payments.length > 0 ? payments[0].totalAmount : 0;
             res.send({ users, donations, funds });
-        });        
+        });
 
         // payment intent
         app.post('/create-payment', async (req, res) => {
